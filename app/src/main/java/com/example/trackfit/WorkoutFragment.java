@@ -22,6 +22,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+// Jiaxin added packages about JSON
+import java.util.Map;
+import org.json.*;
+// import org.json.simple.JSONObject;
+
 public class WorkoutFragment extends Fragment implements View.OnClickListener {
     private ArrayList<String>quotes = new ArrayList<String>();
     private TextView quotesTextView;
@@ -64,8 +69,24 @@ public class WorkoutFragment extends Fragment implements View.OnClickListener {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        weatherTextView.setText("Response is: "+ response.substring(0,500));
+                        String jsonString = response ;
+                        JSONObject obj = null;
+                        try {
+                            obj = new JSONObject(jsonString);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            JSONArray arr = obj.getJSONArray("data");
+                            String temp = arr.getJSONObject(0).getString("temp");
+                            JSONObject weather = arr.getJSONObject(0).getJSONObject("weather");
+                            String textWeather = weather.getString("description");
+                            //String pageName = obj.getJSONObject("temp").getString("pageName");
+                            weatherTextView.setText("The temperature is: "+ temp + " The weather is: " + textWeather);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
                     }
                 }, new Response.ErrorListener() {
             @Override
