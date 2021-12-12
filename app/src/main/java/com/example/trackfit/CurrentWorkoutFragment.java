@@ -31,6 +31,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.text.DecimalFormat;
@@ -58,6 +59,7 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
 
     private GoogleMap mGoogleMap;
     private MapView mapView;
+    private Marker marker;
 
     private final LatLng initialLocation = new LatLng(43, 89);
 
@@ -100,7 +102,7 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
         mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
-        mGoogleMap.addMarker(new MarkerOptions().position(initialLocation));
+        Marker marker = mGoogleMap.addMarker(new MarkerOptions().position(initialLocation));
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initialLocation, 15));
     }
 
@@ -173,6 +175,9 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
                 int secs = seconds % 60;
 
                 String time = String.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, secs);
+
+
+
                 durationTextView.setText(time);
                 seconds++;
 
@@ -192,6 +197,8 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
                     distanceTraveled +=  location.distanceTo(prevLocation) * METERS_TO_MILES;
                     prevLocation = location;
                     currentDistanceTextView.setText(df.format(distanceTraveled));
+                    marker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+
                 }
             }
 
