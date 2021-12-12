@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNavView = findViewById(R.id.bottomnav);
         bottomNavView.setOnItemSelectedListener(bottomNavFunction);
+        bottomNavView.setSelectedItemId(R.id.workout);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.container, new WorkoutFragment()).commit();
     }

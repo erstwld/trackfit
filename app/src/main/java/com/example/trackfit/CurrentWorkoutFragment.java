@@ -30,6 +30,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -103,9 +104,9 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
         mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
-        // Get the location first, default location is Madison
-        Double Lat = 43.0;
-        Double Lon = -89.0;
+        mGoogleMap.setMaxZoomPreference(17);
+        mGoogleMap.setMinZoomPreference(17);
+
         int permission = ActivityCompat.checkSelfPermission(getContext().getApplicationContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION);
         if (permission == PackageManager.PERMISSION_DENIED){
@@ -116,20 +117,18 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
             locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
             locationListener = new LocationListener() {
                 @Override
-                public void onLocationChanged(@NonNull Location location) {
-
-                }
+                public void onLocationChanged(@NonNull Location location) {}
             };
         }
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0, locationListener);
         Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-        Lat = location.getLatitude();
-        Lon = location.getLongitude();
-        marker = mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(Lat, Lon)));
-        marker.setVisible(true);
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initialLocation, 15));
+        Double Lat = location.getLatitude();
+        Double Lon = location.getLongitude();
+        LatLng position = new LatLng(Lat, Lon);
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(position));
+        mGoogleMap.setMyLocationEnabled(true);
     }
 
     @Override
@@ -202,8 +201,6 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
 
                 String time = String.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, secs);
 
-
-
                 durationTextView.setText(time);
                 seconds++;
 
@@ -223,11 +220,8 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
                     distanceTraveled +=  location.distanceTo(prevLocation) * METERS_TO_MILES;
                     prevLocation = location;
                     currentDistanceTextView.setText(df.format(distanceTraveled));
-                    if (location == null){
 
-                    }else {
-                        marker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
-                    }
+                    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
                 }
             }
 
