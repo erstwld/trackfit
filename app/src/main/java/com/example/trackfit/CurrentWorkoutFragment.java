@@ -25,11 +25,22 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.text.DecimalFormat;
 import java.util.Locale;
+import java.util.Objects;
 
 
-public class CurrentWorkoutFragment extends Fragment implements View.OnClickListener, SensorEventListener {
+public class CurrentWorkoutFragment extends Fragment implements View.OnClickListener, SensorEventListener, OnMapReadyCallback {
     private static final float METERS_TO_MILES = 0.000621371f;
     private static final DecimalFormat df = new DecimalFormat("0.00");
 
@@ -47,6 +58,13 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
     private TextView durationTextView;
     private TextView currentDistanceTextView;
 
+    private GoogleMap mGoogleMap;
+    private MapView mapView;
+    private Marker marker;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 12;
+
+    private final LatLng initialLocation = new LatLng(43, -89);
+
     public CurrentWorkoutFragment() {
         // Required empty public constructor
     }
@@ -56,6 +74,10 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_current_workout, container, false);
+        mapView = (MapView) view.findViewById(R.id.mapView);
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
+
 
         stopWorkoutButton = (Button) view.findViewById(R.id.saveWorkoutButton);
         durationTextView = (TextView) view.findViewById(R.id.totalElapsedTime);
@@ -76,6 +98,71 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
         runDistance();
 
         return view;
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mGoogleMap = googleMap;
+        mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
+        mGoogleMap.setMaxZoomPreference(17);
+        mGoogleMap.setMinZoomPreference(17);
+
+        int permission = ActivityCompat.checkSelfPermission(getContext().getApplicationContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION);
+        if (permission == PackageManager.PERMISSION_DENIED){
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }else{
+            locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+            locationListener = new LocationListener() {
+                @Override
+                public void onLocationChanged(@NonNull Location location) {}
+            };
+        }
+
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0, locationListener);
+        Location location = locationManager.getLastKnownLocation(LocationManager.FUSED_PROVIDER);
+
+        if (location != null) {
+            Double Lat = location.getLatitude();
+            Double Lon = location.getLongitude();
+            LatLng position = new LatLng(Lat, Lon);
+            System.out.println(Lat);
+            System.out.println(Lon);
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(position));
+        }
+        mGoogleMap.setMyLocationEnabled(true);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
     }
 
     @Override
@@ -117,6 +204,7 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
                 int secs = seconds % 60;
 
                 String time = String.format(Locale.getDefault(), "%d:%02d:%02d", hours, minutes, secs);
+
                 durationTextView.setText(time);
                 seconds++;
 
@@ -136,6 +224,8 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
                     distanceTraveled +=  location.distanceTo(prevLocation) * METERS_TO_MILES;
                     prevLocation = location;
                     currentDistanceTextView.setText(df.format(distanceTraveled));
+
+                    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
                 }
             }
 
@@ -152,12 +242,14 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
             if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             } else {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
-                Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 1000, 0, locationListener);
+                Location location = locationManager.getLastKnownLocation(LocationManager.FUSED_PROVIDER);
                 if (location != null) {
                     prevLocation = location;
                 }
             }
         }
     }
+
+
 }
