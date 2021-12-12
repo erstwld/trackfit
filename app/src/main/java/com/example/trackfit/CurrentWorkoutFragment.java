@@ -61,7 +61,7 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
     private MapView mapView;
     private Marker marker;
 
-    private final LatLng initialLocation = new LatLng(43, 89);
+    private final LatLng initialLocation = new LatLng(43, -89);
 
     public CurrentWorkoutFragment() {
         // Required empty public constructor
@@ -197,8 +197,11 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
                     distanceTraveled +=  location.distanceTo(prevLocation) * METERS_TO_MILES;
                     prevLocation = location;
                     currentDistanceTextView.setText(df.format(distanceTraveled));
-                    marker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+                    if (location == null){
 
+                    }else {
+                        marker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+                    }
                 }
             }
 

@@ -86,7 +86,7 @@ public class WorkoutFragment extends Fragment implements View.OnClickListener {
 
         // Get the location first, default location is Madison
         String Lat = "43";
-        String Lon = "89";
+        String Lon = "-89";
         int permission = ActivityCompat.checkSelfPermission(getContext().getApplicationContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION);
         if (permission == PackageManager.PERMISSION_DENIED){
@@ -129,11 +129,15 @@ public class WorkoutFragment extends Fragment implements View.OnClickListener {
                         try {
                             JSONArray arr = obj.getJSONArray("data");
                             String temp = arr.getJSONObject(0).getString("temp");
+                            Double C = Double.valueOf(temp);
+                            Double F = C * 1.8 + 32;
+                            temp = String.valueOf(F);
+
                             String city = arr.getJSONObject(0).getString("city_name");
                             JSONObject weather = arr.getJSONObject(0).getJSONObject("weather");
                             String textWeather = weather.getString("description");
                             //String pageName = obj.getJSONObject("temp").getString("pageName");
-                            weatherTextView.setText("The temperature is: "+ temp + " The weather is: " + textWeather);
+                            weatherTextView.setText("The temperature is: "+ temp + "°F\n The weather is: " + textWeather);
                             cityTextView.setText("City: " + city);
                         } catch (JSONException e) {
                             e.printStackTrace();
