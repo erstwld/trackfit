@@ -122,12 +122,16 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
         }
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0, locationListener);
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        Location location = locationManager.getLastKnownLocation(LocationManager.FUSED_PROVIDER);
 
-        Double Lat = location.getLatitude();
-        Double Lon = location.getLongitude();
-        LatLng position = new LatLng(Lat, Lon);
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(position));
+        if (location != null) {
+            Double Lat = location.getLatitude();
+            Double Lon = location.getLongitude();
+            LatLng position = new LatLng(Lat, Lon);
+            System.out.println(Lat);
+            System.out.println(Lon);
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(position));
+        }
         mGoogleMap.setMyLocationEnabled(true);
     }
 
@@ -238,8 +242,8 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
             if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             } else {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
-                Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 1000, 0, locationListener);
+                Location location = locationManager.getLastKnownLocation(LocationManager.FUSED_PROVIDER);
                 if (location != null) {
                     prevLocation = location;
                 }
