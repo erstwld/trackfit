@@ -33,4 +33,7 @@
     <meta-data
         android:name="com.android.volley"
         android:value="AIzaSyBjIb5no7AGKBliu4H6eanxyGfH_j0oTdM"/>
+    <meta-data
+        android:name="com.google.android.geo.API_KEY"
+        android:value="AIzaSyBXIfZQlwr9HbFIN-diyFEjgIfN7B7GjQ4"/>
 </manifest>
