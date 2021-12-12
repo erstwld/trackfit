@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.text.DateFormat;
@@ -31,7 +32,6 @@ public class EndWorkoutFragment extends Fragment implements View.OnClickListener
     private String gDays;
     private String gDistance;
     private String gCalories;
-    private ProfileDetailsFragment Profile;
     public EndWorkoutFragment() {
         // Required empty public constructor
     }
@@ -51,18 +51,21 @@ public class EndWorkoutFragment extends Fragment implements View.OnClickListener
         TextView stepsTaken = (TextView) view.findViewById(R.id.stepsTakenCounter);
         TextView caloriesBurned = (TextView) view.findViewById(R.id.caloriesCounter);
         TextView pace = (TextView) view.findViewById(R.id.paceTextView);
+        ProgressBar daysProgressBar = (ProgressBar) view.findViewById(R.id.daysProgressBar);
+        ProgressBar distanceProgressBar = (ProgressBar) view.findViewById(R.id.distanceProgressBar);
+        ProgressBar caloriesProgressBar = (ProgressBar) view.findViewById(R.id.caloriesProgressBar);
+
         goalDaysDisplay = (TextView) view.findViewById(R.id.daysProgressLabel);
         goalDistanceDisplay = (TextView) view.findViewById(R.id.distanceProgressLabel);
         goalCaloriesDisplay = (TextView) view.findViewById(R.id.caloriesProgressLabel);
 
         // Populate UI elements with correct values
-        Profile = new ProfileDetailsFragment();
-        gDays = String.valueOf(Profile.getGoalDays());//fetch the goals the user inputted
-        gDistance = String.valueOf(Profile.getGoalDistance());//fetch the goals the user inputted
-        gCalories = String.valueOf(Profile.getGoalCalories());//fetch the goals the user inputted
-        goalDaysDisplay.setText("0/"+gDays);//hardcoded till we figure out the days days++
-        goalDistanceDisplay.setText("0/" + gDistance);//hardcoded till we figure out the days
-        goalCaloriesDisplay.setText("0/" + gCalories);
+        gDays = sharedPreferences.getString("goalDays", "");;//fetch the goals the user inputted
+        gDistance = sharedPreferences.getString("goalDistance", "");//fetch the goals the user inputted
+        gCalories = sharedPreferences.getString("goalCalories", "");//fetch the goals the user inputted
+        String prevDays = sharedPreferences.getString("prevDays", "");
+        String prevDistance = sharedPreferences.getString("prevDistance", "");
+        String prevCalories = sharedPreferences.getString("prevCalories", "");
 
         int totalTime = getArguments().getInt("time");
         float totalDistance = getArguments().getFloat("distance");
@@ -71,11 +74,24 @@ public class EndWorkoutFragment extends Fragment implements View.OnClickListener
 
         caloriesBurntDuringWorkout = calculateCalories(totalTime, weight);
 
+        Float newDist = Float.parseFloat(prevDistance) + totalDistance;
+        int newCals = Integer.parseInt(prevCalories) + caloriesBurntDuringWorkout;
+
+        goalDaysDisplay.setText("3/"+ gDays + " Days"); // Hard coded cuz of time
+        goalDistanceDisplay.setText(newDist.toString() + "/" + gDistance + " Miles");
+        goalCaloriesDisplay.setText(String.valueOf(newCals) + "/" + gCalories + " Calories");
         duration.setText(formatTime(totalTime));
         distance.setText(df.format(totalDistance));
         stepsTaken.setText(String.valueOf((int) totalSteps));
         caloriesBurned.setText(String.valueOf(caloriesBurntDuringWorkout));
         pace.setText(calculatePace(totalTime, totalDistance));
+
+        daysProgressBar.setProgress(60);
+        distanceProgressBar.setProgress((int) (newDist / Float.parseFloat(gDistance)) * 100);
+        caloriesProgressBar.setProgress((int) (newCals / Integer.parseInt(gCalories)) * 100);
+
+        sharedPreferences.edit().putString("prevDistance", newDist.toString()).apply();
+        sharedPreferences.edit().putString("prevCalories", String.valueOf(newCals)).apply();
 
         saveWorkout.setOnClickListener(this);
         deleteWorkout.setOnClickListener(this);
@@ -120,7 +136,7 @@ public class EndWorkoutFragment extends Fragment implements View.OnClickListener
     private int calculateCalories(int duration, String weight) {
         int mins = duration / 60;
         double weight_kg = Integer.parseInt(weight) * 0.453592;
-        return (int) (((9.8 * 3.5 * weight_kg) / 200) * mins);
+        return (int) (((7.5 * 3.5 * weight_kg) / 200) * mins);
     }
 
     private String calculatePace(int time, float distance) {
