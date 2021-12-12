@@ -101,7 +101,7 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
         mGoogleMap = googleMap;
         mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
         mGoogleMap.addMarker(new MarkerOptions().position(initialLocation));
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initialLocation, 1));
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initialLocation, 15));
     }
 
     @Override
