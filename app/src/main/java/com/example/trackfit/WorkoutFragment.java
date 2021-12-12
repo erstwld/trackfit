@@ -47,10 +47,10 @@ public class WorkoutFragment extends Fragment implements View.OnClickListener {
     private TextView quotesTextView;
     private TextView weatherTextView;
     private TextView cityTextView;
-    private RequestQueue queue;
+    //private RequestQueue queue;
     private LocationManager locationManager;
     private LocationListener locationListener;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
+    //private FusedLocationProviderClient mFusedLocationProviderClient;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 12;
 
     public WorkoutFragment() {
@@ -80,8 +80,6 @@ public class WorkoutFragment extends Fragment implements View.OnClickListener {
         quotesTextView.setText(toDisplayQuote);
         startWorkout.setOnClickListener(this);
 
-        // Jiaxin added: about weather
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
 
 
         // Get the location first, default location is Madison

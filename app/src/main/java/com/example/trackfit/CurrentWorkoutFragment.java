@@ -60,6 +60,7 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
     private GoogleMap mGoogleMap;
     private MapView mapView;
     private Marker marker;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 12;
 
     private final LatLng initialLocation = new LatLng(43, -89);
 
@@ -102,7 +103,32 @@ public class CurrentWorkoutFragment extends Fragment implements View.OnClickList
     public void onMapReady(GoogleMap googleMap) {
         mGoogleMap = googleMap;
         mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
-        Marker marker = mGoogleMap.addMarker(new MarkerOptions().position(initialLocation));
+        // Get the location first, default location is Madison
+        Double Lat = 43.0;
+        Double Lon = -89.0;
+        int permission = ActivityCompat.checkSelfPermission(getContext().getApplicationContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION);
+        if (permission == PackageManager.PERMISSION_DENIED){
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }else{
+            locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+            locationListener = new LocationListener() {
+                @Override
+                public void onLocationChanged(@NonNull Location location) {
+
+                }
+            };
+        }
+
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        Lat = location.getLatitude();
+        Lon = location.getLongitude();
+        marker = mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(Lat, Lon)));
+        marker.setVisible(true);
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(initialLocation, 15));
     }
 
